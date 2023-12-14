@@ -1,25 +1,3 @@
-// const Router = require("koa-router");
-// const handlers = require("../handlers/products/productHandlers");
-// const {
-//   inputCreateMiddleware,
-//   inputUpdateMiddleware,
-// } = require("../middleware/productInputMiddleware");
-
-// // Prefix all routes with /products
-
-// const router = new Router({
-//   prefix: "/api/products",
-// });
-// // Routes will go here
-// // router.get("/view", handlers.test);
-// router.get("/", handlers.getProducts);
-// router.get("/:id", handlers.getProduct);
-// router.post("/", inputCreateMiddleware, handlers.save);
-// router.put("/:id", inputUpdateMiddleware, handlers.update);
-// router.delete("/:id", handlers.deleteOne);
-
-// module.exports = router;
-
 const Router = require("koa-router");
 const handlers = require("../handlers/products/productHandlers");
 const {

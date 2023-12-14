@@ -3,7 +3,6 @@ const handlers = require("../handlers/books/bookHandlers");
 const inputMiddleware = require("../middleware/bookInputMiddleware");
 
 // Prefix all routes with /books
-
 const router = new Router({
   prefix: "/api",
 });
