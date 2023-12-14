@@ -1,0 +1,72 @@
+<h2 class="p-5 pb-0">Create new product</h2>
+<div class="p-5">
+  <div class="mb-3">
+    <label for="name" class="form-label">Name</label>
+    <input type="text" class="form-control" id="name" name="name" />
+  </div>
+
+  <div class="mb-3">
+    <label for="price" class="form-label">Price</label>
+    <input type="number" class="form-control" id="price" name="price" />
+  </div>
+
+  <div class="mb-3">
+    <label for="description" class="form-label">Description</label>
+    <textarea
+      class="form-control"
+      id="description"
+      name="description"
+    ></textarea>
+  </div>
+
+  <div class="mb-3">
+    <label for="product" class="form-label">Product</label>
+    <input type="text" class="form-control" id="product" name="product" />
+  </div>
+
+  <div class="mb-3">
+    <label for="color" class="form-label">Color</label>
+    <input type="text" class="form-control" id="color" name="color" />
+  </div>
+
+  <div class="mb-3">
+    <label for="image" class="form-label">Image URL</label>
+    <input type="text" class="form-control" id="image" name="image" />
+  </div>
+
+  <button onclick="submitNew()" class="btn btn-primary">Submit</button>
+</div>
+
+<script>
+  function getNewProductFromDOM() {
+    const name = document.getElementById("name").value;
+    const price = document.getElementById("price").value;
+    const description = document.getElementById("description").value;
+    const product = document.getElementById("product").value;
+    const color = document.getElementById("color").value;
+    const image = document.getElementById("image").value;
+
+    return {
+      name,
+      price: parseInt(price),
+      description,
+      product,
+      color,
+      image,
+    };
+  }
+  async function submitNew() {
+    const newProduct = getNewProductFromDOM();
+    const apiUrl = "http://localhost:5000/api/products";
+
+    const res = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newProduct),
+    });
+
+    console.log(res);
+  }
+</script>

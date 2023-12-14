@@ -1,0 +1,105 @@
+<style>
+  .div-container {
+    padding: 64px;
+    margin: 0;
+    display: block;
+    width: 100vw;
+    height: calc(100vh - 100px);
+    box-sizing: border-box;
+    overflow-y: scroll;
+  }
+</style>
+
+<div class="div-container">
+  <div class="d-flex justify-content-between">
+    <h2>Products</h2>
+    <a
+      href="http://localhost:5000/view/products/new"
+      class="btn btn-primary mb-5"
+    >
+      Create new product
+    </a>
+  </div>
+  <table class="table">
+    <thead>
+      <tr class="border">
+        <th class="border border-0">Id</th>
+        <th class="border border-0">Name</th>
+        <th class="border border-0">Price</th>
+        <th class="border border-0">Description</th>
+        <th class="border border-0">Product</th>
+        <th class="border border-0">Color</th>
+        <th class="border border-0">CreatedAt</th>
+        <th class="border border-0">Image</th>
+        <th class="border border-0">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% products.forEach(function (product) {%>
+      <tr class="border">
+        <td class="border border-0"><%= product.id %></td>
+        <td class="border border-0"><%= product.name %></td>
+        <td class="border border-0"><%= product.price %></td>
+        <td class="border border-0"><%= product.description %></td>
+        <td class="border border-0"><%= product.product %></td>
+        <td class="border border-0"><%= product.color %></td>
+        <td class="border border-0"><%= product.createdAt %></td>
+        <td class="border border-0">
+          <img
+            src="<%= product.image %>"
+            alt="Image"
+            style="height: 60px; width: 60px"
+          />
+        </td>
+        <td class="d-flex border border-0 align-items-center">
+          <a
+            href="http://localhost:5000/view/products/<%= product.id %>"
+            class="btn btn-primary me-2"
+          >
+            Edit
+          </a>
+          <button
+            class="btn btn-danger"
+            onclick="deleteProduct(<%= product.id %>)"
+          >
+            Delete
+          </button>
+        </td>
+      </tr>
+      <% })%>
+    </tbody>
+  </table>
+</div>
+
+<nav aria-label="..." class="d-flex justify-content-center p-4">
+  <ul class="pagination pagination-sm">
+    <% for(let i = 0; i < pages; i++) { %>
+      <li <%  if (currentPage == i) { %>class="page-item active"<% } else { %>class="page-item"<% } %>>
+      <a
+        class="page-link"
+        href="http://localhost:5000/view/products?limit=<%= limit%>&page=<%= i %>"
+      >
+        <%= i+1 %>
+      </a>
+    </li>
+    <% } %>
+  </ul>
+</nav>
+
+<script>
+  async function deleteProduct(id) {
+    const apiUrl = `http://localhost:5000/api/products/${id}`;
+
+    const res = await fetch(apiUrl, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    console.log(res);
+    if (res.status === 200) {
+      window.location.reload();
+    }
+  }
+</script>
