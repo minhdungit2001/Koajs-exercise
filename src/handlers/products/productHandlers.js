@@ -8,8 +8,9 @@ const {
   countAll: countAllProducts,
 } = require("../../database/productRepository");
 const { DEFAULT_LIMIT } = require("../../const/default");
+
 /**
- *
+ * Render html for Update product
  * @param ctx
  * @returns {Promise<void>}
  *
@@ -28,7 +29,7 @@ async function viewUpdate(ctx) {
 }
 
 /**
- *
+ * Render html for create new product
  * @param ctx
  * @returns {Promise<void>}
  *
@@ -47,7 +48,7 @@ async function viewAddNew(ctx) {
 }
 
 /**
- *
+ * Render html to see
  * @param ctx
  * @returns {Promise<void>}
  *
@@ -57,13 +58,15 @@ async function viewAll(ctx) {
     const { limit, sort, fields, page } = ctx.request.query;
     const validLimit = limit ? parseInt(limit) : DEFAULT_LIMIT;
 
-    const products = await getAllProducts({
-      limit: validLimit,
-      sort,
-      fields,
-      offset: page ? page * validLimit : 0,
-    });
-    const productsCount = await countAllProducts();
+    const [products, productsCount] = await Promise.all([
+      getAllProducts({
+        limit: validLimit,
+        sort,
+        fields,
+        offset: page ? page * validLimit : 0,
+      }),
+      countAllProducts(),
+    ]);
 
     return await ctx.render("pages/product", {
       products,
@@ -82,7 +85,7 @@ async function viewAll(ctx) {
 }
 
 /**
- *
+ * Get products from db
  * @param ctx
  * @returns {Promise<void>}
  */
@@ -106,7 +109,7 @@ async function getProducts(ctx) {
 }
 
 /**
- *
+ * Get product by id
  * @param ctx
  * @returns {Promise<{data: product}>}
  */
@@ -131,7 +134,7 @@ async function getProduct(ctx) {
 }
 
 /**
- *
+ * Create a new product
  * @param ctx
  * @returns {Promise<{success: boolean, error: *}|{success: boolean}>}
  */
@@ -153,7 +156,7 @@ async function save(ctx) {
 }
 
 /**
- *
+ * Update a product
  * @param ctx
  * @returns {Promise<{success: boolean, error: *}|{success: boolean}>}
  */
@@ -167,7 +170,7 @@ async function update(ctx) {
       throw new Error("Products Not Found with that id!");
     }
 
-    updateProduct({ ...currentProducts, ...postData });
+    await updateProduct({ ...currentProducts, ...postData });
 
     ctx.status = 200;
     return (ctx.body = {
@@ -182,7 +185,7 @@ async function update(ctx) {
 }
 
 /**
- *
+ * Delete a product by id
  * @param ctx
  * @returns {Promise<{success: boolean, error: *}|{success: boolean}>}
  */

@@ -1,5 +1,10 @@
 const yup = require("yup");
 
+/**
+ * Validate for create new product
+ * @param {*} ctx
+ * @param {*} next
+ */
 async function inputCreateMiddleware(ctx, next) {
   try {
     const postData = ctx.request.body;
@@ -24,6 +29,11 @@ async function inputCreateMiddleware(ctx, next) {
   }
 }
 
+/**
+ * Valdidate for update product
+ * @param {*} ctx
+ * @param {*} next
+ */
 async function inputUpdateMiddleware(ctx, next) {
   try {
     const postData = ctx.request.body;
@@ -48,12 +58,22 @@ async function inputUpdateMiddleware(ctx, next) {
   }
 }
 
+/**
+ * Check string is have number
+ * @param {String} str
+ * @returns {true | false}
+ */
 const isStringNumber = (str) => /^[0-9]+$/.test(str);
 
+/**
+ * Validate and format string query to match type
+ * @param {*} ctx
+ * @param {*} next
+ * @returns
+ */
 async function inputQueryGetAllMiddleware(ctx, next) {
   try {
     const { limit, sort, fields, offset, page } = ctx.request.query;
-
     const validQuery = {};
 
     if (isStringNumber(limit)) {
@@ -71,6 +91,7 @@ async function inputQueryGetAllMiddleware(ctx, next) {
     if (fields) {
       validQuery.fields = fields?.split(",");
     }
+
     ctx.request.query = validQuery;
 
     return next();

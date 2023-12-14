@@ -34,11 +34,12 @@
     <input type="text" class="form-control" id="image" name="image" />
   </div>
 
-  <button onclick="submitNew()" class="btn btn-primary">Submit</button>
+  <button onclick="createProductDb()" class="btn btn-primary">Submit</button>
 </div>
 
 <script>
-  function getNewProductFromDOM() {
+  // Get information from DOM
+  function getProductFromDOM() {
     const name = document.getElementById("name").value;
     const price = document.getElementById("price").value;
     const description = document.getElementById("description").value;
@@ -55,8 +56,10 @@
       image,
     };
   }
-  async function submitNew() {
-    const newProduct = getNewProductFromDOM();
+
+  // Call api to save new product
+  async function createProductDb() {
+    const newProduct = getProductFromDOM();
     const apiUrl = "http://localhost:5000/api/products";
 
     const res = await fetch(apiUrl, {

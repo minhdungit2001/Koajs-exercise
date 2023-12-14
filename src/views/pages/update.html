@@ -38,7 +38,8 @@
 </div>
 
 <script>
-  function getNewProductFromDOM() {
+  // Get product from DOM
+  function getProductFromDOM() {
     const name = document.getElementById("name").value;
     const price = document.getElementById("price").value;
     const description = document.getElementById("description").value;
@@ -56,6 +57,7 @@
     };
   }
 
+  // Format product by remove filed null
   function removePropertiesNull(data) {
     const product = {};
 
@@ -68,9 +70,11 @@
 
     return product;
   }
+
+  // Call api to update product
   async function updateProductDb() {
     const postId = location.pathname.split("/")[3];
-    const product = getNewProductFromDOM();
+    const product = getProductFromDOM();
     const updateProduct = removePropertiesNull(product);
 
     const apiUrl = `http://localhost:5000/api/products/${postId}`;
