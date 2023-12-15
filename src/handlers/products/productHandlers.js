@@ -57,18 +57,16 @@ async function viewAll(ctx) {
   try {
     const { limit, sort, fields, page } = ctx.request.query;
 
-    const [products, productsCount] = await Promise.all([
-      getAllProducts({
-        limit,
-        sort,
-        fields,
-        offset: page * limit,
-      }),
-      countAllProducts(),
-    ]);
+    const products = getAllProducts({
+      limit,
+      sort,
+      fields,
+      offset: page * limit,
+    });
+    const productsCount = countAllProducts();
 
     return await ctx.render("pages/product", {
-      products,
+      products: products,
       pages: Math.floor(productsCount / limit) + 1,
       currentPage: page,
       limit: limit,
@@ -83,7 +81,6 @@ async function viewAll(ctx) {
   }
 }
 
-//TODO sửa lại phần valid, getProduct có offset or page limit
 /**
  * Get products from db
  * @param ctx
@@ -93,7 +90,7 @@ async function getProducts(ctx) {
   try {
     const { limit, sort, fields, offset } = ctx.request.query;
 
-    const products = await getAllProducts({
+    const products = getAllProducts({
       limit,
       sort,
       fields,
@@ -121,7 +118,7 @@ async function getProducts(ctx) {
 async function getProduct(ctx) {
   try {
     const { id } = ctx.params;
-    const currentProducts = await getOneProduct(id);
+    const currentProducts = getOneProduct(id);
     if (currentProducts) {
       return (ctx.body = {
         data: currentProducts,
@@ -146,7 +143,7 @@ async function getProduct(ctx) {
 async function save(ctx) {
   try {
     const postData = ctx.request.body;
-    await addProduct(postData);
+    addProduct(postData);
 
     ctx.status = 201;
     return (ctx.body = {
@@ -170,12 +167,12 @@ async function update(ctx) {
     const postData = ctx.request.body;
     const { id } = ctx.params;
 
-    const currentProducts = await getOneProduct(id);
+    const currentProducts = getOneProduct(id);
     if (!currentProducts) {
       throw new Error("Products Not Found with that id!");
     }
 
-    await updateProduct({ ...currentProducts, ...postData });
+    updateProduct({ ...currentProducts, ...postData });
 
     ctx.status = 200;
     return (ctx.body = {
@@ -194,7 +191,7 @@ async function update(ctx) {
  * @param ctx
  * @returns {Promise<{success: boolean, error: *}|{success: boolean}>}
  */
-function deleteOne(ctx) {
+async function deleteOne(ctx) {
   try {
     const { id } = ctx.params;
 
