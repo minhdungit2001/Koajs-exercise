@@ -12,11 +12,7 @@ const router = new Router({});
 // Routes will go here
 router.get("/view/products/new", handlers.viewAddNew);
 router.get("/view/products/:id", handlers.viewUpdate);
-router.get(
-  "/view/products",
-  (ctx, next) => inputQueryGetAllMiddleware(ctx, next),
-  handlers.viewAll
-);
+router.get("/view/products", inputQueryGetAllMiddleware, handlers.viewAll);
 
 router.get("/api/products", inputQueryGetAllMiddleware, handlers.getProducts);
 router.get("/api/products/:id", handlers.getProduct);

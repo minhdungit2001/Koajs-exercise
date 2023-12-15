@@ -1,4 +1,5 @@
 const yup = require("yup");
+const { DEFAULT_LIMIT } = require("../const/default");
 
 /**
  * Validate for create new product
@@ -73,18 +74,15 @@ const isStringNumber = (str) => /^[0-9]+$/.test(str);
  */
 async function inputQueryGetAllMiddleware(ctx, next) {
   try {
-    const { limit, sort, fields, offset, page } = ctx.request.query;
+    const { limit, sort, fields, page, offset } = ctx.request.query;
     const validQuery = {};
 
-    if (isStringNumber(limit)) {
-      validQuery.limit = parseInt(limit);
-    }
-    if (isStringNumber(offset)) {
-      validQuery.offset = parseInt(offset);
-    }
-    if (isStringNumber(page)) {
-      validQuery.page = parseInt(page);
-    }
+    validQuery.limit = isStringNumber(limit) ? parseInt(limit) : DEFAULT_LIMIT;
+    validQuery.page = isStringNumber(page) ? parseInt(page) : 0;
+    validQuery.offset = isStringNumber(offset)
+      ? parseInt(offset)
+      : validQuery.limit * validQuery.page;
+
     if ((sort === "desc") | (sort === "asc")) {
       validQuery.sort = sort;
     }

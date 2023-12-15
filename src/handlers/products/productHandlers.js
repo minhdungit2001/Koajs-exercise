@@ -7,7 +7,6 @@ const {
   getFields: getFieldsProduct,
   countAll: countAllProducts,
 } = require("../../database/productRepository");
-const { DEFAULT_LIMIT } = require("../../const/default");
 
 /**
  * Render html for Update product
@@ -49,6 +48,7 @@ async function viewAddNew(ctx) {
 
 /**
  * Render html to see
+ * Validate and set default in middleware
  * @param ctx
  * @returns {Promise<void>}
  *
@@ -56,23 +56,22 @@ async function viewAddNew(ctx) {
 async function viewAll(ctx) {
   try {
     const { limit, sort, fields, page } = ctx.request.query;
-    const validLimit = limit ? parseInt(limit) : DEFAULT_LIMIT;
 
     const [products, productsCount] = await Promise.all([
       getAllProducts({
-        limit: validLimit,
+        limit,
         sort,
         fields,
-        offset: page ? page * validLimit : 0,
+        offset: page * limit,
       }),
       countAllProducts(),
     ]);
 
     return await ctx.render("pages/product", {
       products,
-      pages: Math.floor(productsCount / validLimit) + 1,
-      currentPage: page ?? 0,
-      limit: validLimit,
+      pages: Math.floor(productsCount / limit) + 1,
+      currentPage: page,
+      limit: limit,
     });
   } catch (e) {
     ctx.status = 404;
@@ -84,6 +83,7 @@ async function viewAll(ctx) {
   }
 }
 
+//TODO sửa lại phần valid, getProduct có offset or page limit
 /**
  * Get products from db
  * @param ctx
@@ -93,7 +93,12 @@ async function getProducts(ctx) {
   try {
     const { limit, sort, fields, offset } = ctx.request.query;
 
-    const products = await getAllProducts({ limit, sort, fields, offset });
+    const products = await getAllProducts({
+      limit,
+      sort,
+      fields,
+      offset,
+    });
 
     ctx.body = {
       data: products,
@@ -189,16 +194,16 @@ async function update(ctx) {
  * @param ctx
  * @returns {Promise<{success: boolean, error: *}|{success: boolean}>}
  */
-async function deleteOne(ctx) {
+function deleteOne(ctx) {
   try {
     const { id } = ctx.params;
 
-    const currentProducts = await getOneProduct(id);
+    const currentProducts = getOneProduct(id);
     if (!currentProducts) {
       throw new Error("Products Not Found with that id!");
     }
 
-    await deleteOneProduct(id);
+    deleteOneProduct(id);
 
     ctx.status = 200;
     return (ctx.body = {

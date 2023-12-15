@@ -7,19 +7,19 @@ const { DEFAULT_LIMIT } = require("../const/default");
  * @param {Number} limit
  * @param {"desc" | "asc"} sort
  * @param {Array<string>} fields
- * @returns {Promise<Array<Product>}
+ * @returns {Array<Product>}
  */
-async function getAll({ limit, sort, fields, offset }) {
+function getAll({ fields, offset = 0, limit = DEFAULT_LIMIT, sort = "desc" }) {
   let resultProducts = products;
 
   resultProducts = sortDatasByCreatedAt(resultProducts, sort);
-  resultProducts = getLimitOffset(resultProducts, limit, offset);
-  resultProducts = mapEnitiesToEntityDtos(resultProducts, fields);
+  resultProducts = getWithLimitOffset({ datas: resultProducts, limit, offset });
+  resultProducts = mapDatasWithFields(resultProducts, fields);
 
   return resultProducts;
 }
 
-async function countAll() {
+function countAll() {
   return products.length;
 }
 /**
@@ -28,20 +28,17 @@ async function countAll() {
  * @param {"desc" | "esc"} sort
  * @returns {Array<Product>}
  */
-function sortDatasByCreatedAt(datas, sort) {
-  let resultDatas = [...datas];
-  if (sort === "desc") {
-    resultDatas = datas.sort(
-      (previous, currrent) =>
-        new Date(currrent.createdAt) - new Date(previous.createdAt)
-    );
-  } else if (sort === "asc") {
-    resultDatas = datas.sort(
+function sortDatasByCreatedAt(datas, sort = "desc") {
+  if (sort === "asc") {
+    return [...datas].sort(
       (previous, currrent) =>
         new Date(previous.createdAt) - new Date(currrent.createdAt)
     );
   }
-  return resultDatas;
+  return [...datas].sort(
+    (previous, currrent) =>
+      new Date(currrent.createdAt) - new Date(previous.createdAt)
+  );
 }
 
 /**
@@ -50,10 +47,10 @@ function sortDatasByCreatedAt(datas, sort) {
  * @param {Number} limit
  * @returns {Array<Product>}
  */
-function getLimitOffset(datas, limit, offset) {
+function getWithLimitOffset({ datas, limit = DEFAULT_LIMIT, offset = 0 }) {
   let resultDatas = [...datas];
-  let validOffset = offset ? parseInt(offset) : 0;
-  let validLimit = limit ? parseInt(limit) : DEFAULT_LIMIT;
+  let validOffset = parseInt(offset);
+  let validLimit = parseInt(limit);
 
   if (offset > datas.length) {
     validOffset = datas.length % validLimit;
@@ -70,14 +67,14 @@ function getLimitOffset(datas, limit, offset) {
  * Map products to productdtos
  * @param {Array<Product>} datas
  * @param {Array<string>} fields
- * @returns data tranfer object of products
+ * @returns datas tranfer object of products
  */
-function mapEnitiesToEntityDtos(datas, fields) {
-  let resultDataDtos = [...datas];
+function mapDatasWithFields(datas, fields) {
+  let newDatas = [...datas];
   if (fields?.length > 0) {
-    resultDataDtos = datas.map((data) => mapEntityToEntityDto(data, fields));
+    newDatas = datas.map((data) => mapDataWithFields(data, fields));
   }
-  return resultDataDtos;
+  return newDatas;
 }
 
 /**
@@ -86,7 +83,7 @@ function mapEnitiesToEntityDtos(datas, fields) {
  * @param {Array<Product>} fields
  * @returns data tranfer object of product
  */
-function mapEntityToEntityDto(data, fields) {
+function mapDataWithFields(data, fields) {
   if (fields?.length === 0) return;
 
   let dataDto = {};
@@ -99,9 +96,9 @@ function mapEntityToEntityDto(data, fields) {
 /**
  * Get one by id
  * @param {*} id
- * @returns {Promise<Product>}
+ * @returns {Product}
  */
-async function getOne(id) {
+function getOne(id) {
   return products.find((product) => product.id === parseInt(id));
 }
 
@@ -110,10 +107,10 @@ async function getOne(id) {
  * @param {Product} data
  * @returns
  */
-async function addOne(data) {
+function addOne(data) {
   const newProduct = { ...data };
   newProduct.createdAt = new Date();
-  newProduct.id = await getNewId();
+  newProduct.id = getNewId();
 
   const updatedProducts = [newProduct, ...products];
   return fs.writeFileSync(
@@ -129,7 +126,7 @@ async function addOne(data) {
  * @param {Product} data
  * @returns
  */
-async function updateOne(data) {
+function updateOne(data) {
   const productId = data?.id ? parseInt(data.id) : null;
 
   let updatedProducts = products.filter((product) => product.id !== productId);
@@ -148,7 +145,7 @@ async function updateOne(data) {
  * @param {*} id
  * @returns
  */
-async function deleteOne(id) {
+function deleteOne(id) {
   let updatedProducts = products.filter(
     (product) => product.id !== parseInt(id)
   );
@@ -162,9 +159,9 @@ async function deleteOne(id) {
 
 /**
  * Generate new ID
- * @returns {Promise<NewId>}
+ * @returns {*} new Id
  */
-async function getNewId() {
+function getNewId() {
   let sortDescProducts = sortDatasByCreatedAt(products, "desc");
   if (!sortDescProducts.length) {
     return 1;
@@ -176,7 +173,7 @@ async function getNewId() {
   }
 
   while (1) {
-    const product = await getOne(newId);
+    const product = getOne(newId);
     if (!product) {
       return newId;
     }
