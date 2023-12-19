@@ -9,7 +9,7 @@ const { DEFAULT_LIMIT } = require("../const/default");
  * @param {Array<string>} fields
  * @returns {Array<Product>}
  */
-function getAll({ fields, offset = 0, limit = DEFAULT_LIMIT, sort = "desc" }) {
+function getList({ fields, offset = 0, limit = DEFAULT_LIMIT, sort = "desc" }) {
   let resultProducts = products;
 
   resultProducts = sortDatasByCreatedAt(resultProducts, sort);
@@ -17,6 +17,10 @@ function getAll({ fields, offset = 0, limit = DEFAULT_LIMIT, sort = "desc" }) {
   resultProducts = mapDatasWithFields(resultProducts, fields);
 
   return resultProducts;
+}
+
+function getManyByIds(ids) {
+  return products.filter((product) => ids.includes(product.id));
 }
 
 function countAll() {
@@ -72,25 +76,15 @@ function getWithLimitOffset({ datas, limit = DEFAULT_LIMIT, offset = 0 }) {
 function mapDatasWithFields(datas, fields) {
   let newDatas = [...datas];
   if (fields?.length > 0) {
-    newDatas = datas.map((data) => mapDataWithFields(data, fields));
+    newDatas = datas.map((data) => {
+      let newData = {};
+      for (let key of fields) {
+        if (data[key] !== undefined) newData[key] = data[key];
+      }
+      return newData;
+    });
   }
   return newDatas;
-}
-
-/**
- * Map product to product dto
- * @param {Object} data
- * @param {Array<Product>} fields
- * @returns data tranfer object of product
- */
-function mapDataWithFields(data, fields) {
-  if (fields?.length === 0) return;
-
-  let dataDto = {};
-  for (let key of fields) {
-    if (data[key] !== undefined) dataDto[key] = data[key];
-  }
-  return dataDto;
 }
 
 /**
@@ -107,54 +101,45 @@ function getOne(id) {
  * @param {Product} data
  * @returns
  */
-function addOne(data) {
+function createOne(data) {
   const newProduct = { ...data };
+
   newProduct.createdAt = new Date();
   newProduct.id = getNewId();
+  !data.status ? (newProduct.status = "pending") : null;
+  !data.isCompleted ? (newProduct.isCompleted = false) : null;
 
   const updatedProducts = [newProduct, ...products];
-  return fs.writeFileSync(
-    "./src/database/products.json",
-    JSON.stringify({
-      data: updatedProducts,
-    })
-  );
+
+  return saveToDb(updatedProducts);
 }
 
 /**
- * Update products
- * @param {Product} data
+ * Update many products
+ * @param {Array} ids
+ * @param {Product} data with several fields
  * @returns
  */
-function updateOne(data) {
-  const productId = data?.id ? parseInt(data.id) : null;
+function updateManyByIds(ids, data) {
+  let updatedProducts = products.filter((product) => !ids.includes(product.id));
+  let newProducts = products
+    .filter((product) => ids.includes(product.id))
+    .map((product) => ({ ...product, ...data }));
 
-  let updatedProducts = products.filter((product) => product.id !== productId);
-  updatedProducts = [data, ...updatedProducts];
+  updatedProducts = [...newProducts, ...updatedProducts];
 
-  return fs.writeFileSync(
-    "./src/database/products.json",
-    JSON.stringify({
-      data: updatedProducts,
-    })
-  );
+  return saveToDb(updatedProducts);
 }
 
 /**
- * Delete one of products by id
+ * Delete many of products by ids
  * @param {*} id
  * @returns
  */
-function deleteOne(id) {
-  let updatedProducts = products.filter(
-    (product) => product.id !== parseInt(id)
-  );
-  return fs.writeFileSync(
-    "./src/database/products.json",
-    JSON.stringify({
-      data: updatedProducts,
-    })
-  );
+function deleteManyByIds(ids) {
+  let updatedProducts = products.filter((product) => !ids.includes(product.id));
+
+  return saveToDb(updatedProducts);
 }
 
 /**
@@ -180,12 +165,21 @@ function getNewId() {
     newId++;
   }
 }
+
+function saveToDb(datas) {
+  return fs.writeFileSync(
+    "./src/database/products.json",
+    JSON.stringify({
+      data: datas,
+    })
+  );
+}
 module.exports = {
   getOne,
-  getAll,
-  addOne,
-  updateOne,
-  deleteOne,
-  getNewId,
+  getList,
+  getManyByIds,
   countAll,
+  createOne,
+  deleteManyByIds,
+  updateManyByIds,
 };

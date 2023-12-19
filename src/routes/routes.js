@@ -1,13 +1,13 @@
-const bookRoutes = require("./bookRoutes");
 const productRoutes = require("./productRoutes");
+const todoRoutes = require("./todoRoutes");
 
 // Config router for app
 function configRouter(app) {
-  app.use(bookRoutes.routes());
-  app.use(bookRoutes.allowedMethods());
-
   app.use(productRoutes.routes());
   app.use(productRoutes.allowedMethods());
+
+  app.use(todoRoutes.routes());
+  app.use(todoRoutes.allowedMethods());
 }
 
 module.exports = configRouter;

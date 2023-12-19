@@ -1,9 +1,9 @@
 const {
-  getAll: getAllProducts,
+  getList: getListProducts,
   getOne: getOneProduct,
-  addOne: addProduct,
-  updateOne: updateProduct,
-  deleteOne: deleteOneProduct,
+  createOne: createOneProduct,
+  updateManyByIds: updateManyByIdsProduct,
+  deleteManyByIds: deleteManyByIdsProduct,
   getFields: getFieldsProduct,
   countAll: countAllProducts,
 } = require("../../database/productRepository");
@@ -53,11 +53,11 @@ async function viewAddNew(ctx) {
  * @returns {Promise<void>}
  *
  */
-async function viewAll(ctx) {
+async function viewList(ctx) {
   try {
     const { limit, sort, fields, page } = ctx.request.query;
 
-    const products = getAllProducts({
+    const products = getListProducts({
       limit,
       sort,
       fields,
@@ -86,11 +86,11 @@ async function viewAll(ctx) {
  * @param ctx
  * @returns {Promise<void>}
  */
-async function getProducts(ctx) {
+async function getList(ctx) {
   try {
     const { limit, sort, fields, offset } = ctx.request.query;
 
-    const products = getAllProducts({
+    const products = getListProducts({
       limit,
       sort,
       fields,
@@ -115,7 +115,7 @@ async function getProducts(ctx) {
  * @param ctx
  * @returns {Promise<{data: product}>}
  */
-async function getProduct(ctx) {
+async function getOne(ctx) {
   try {
     const { id } = ctx.params;
     const currentProducts = getOneProduct(id);
@@ -140,10 +140,10 @@ async function getProduct(ctx) {
  * @param ctx
  * @returns {Promise<{success: boolean, error: *}|{success: boolean}>}
  */
-async function save(ctx) {
+async function createOne(ctx) {
   try {
     const postData = ctx.request.body;
-    addProduct(postData);
+    createOneProduct(postData);
 
     ctx.status = 201;
     return (ctx.body = {
@@ -162,7 +162,7 @@ async function save(ctx) {
  * @param ctx
  * @returns {Promise<{success: boolean, error: *}|{success: boolean}>}
  */
-async function update(ctx) {
+async function updateOne(ctx) {
   try {
     const postData = ctx.request.body;
     const { id } = ctx.params;
@@ -172,7 +172,7 @@ async function update(ctx) {
       throw new Error("Products Not Found with that id!");
     }
 
-    updateProduct({ ...currentProducts, ...postData });
+    updateManyByIdsProduct([+id], postData);
 
     ctx.status = 200;
     return (ctx.body = {
@@ -200,7 +200,7 @@ async function deleteOne(ctx) {
       throw new Error("Products Not Found with that id!");
     }
 
-    deleteOneProduct(id);
+    deleteManyByIdsProduct([+id]);
 
     ctx.status = 200;
     return (ctx.body = {
@@ -214,12 +214,12 @@ async function deleteOne(ctx) {
   }
 }
 module.exports = {
-  getProducts,
-  getProduct,
-  save,
-  update,
+  getList,
+  getOne,
+  createOne,
+  updateOne,
   deleteOne,
-  viewAll,
+  viewList,
   viewAddNew,
   viewUpdate,
 };

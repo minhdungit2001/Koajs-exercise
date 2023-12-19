@@ -10,12 +10,9 @@ async function inputCreateMiddleware(ctx, next) {
   try {
     const postData = ctx.request.body;
     let schema = yup.object().shape({
-      name: yup.string().required(),
-      price: yup.number().integer().positive(),
-      description: yup.string(),
-      product: yup.string(),
-      color: yup.string(),
-      image: yup.string(),
+      text: yup.string().required(),
+      status: yup.string().oneOf(["pending", "done"]),
+      isCompleted: yup.boolean(),
     });
 
     await schema.validate(postData);
@@ -39,12 +36,9 @@ async function inputUpdateMiddleware(ctx, next) {
   try {
     const postData = ctx.request.body;
     let schema = yup.object().shape({
-      name: yup.string(),
-      price: yup.number().integer().positive(),
-      description: yup.string(),
-      product: yup.string(),
-      color: yup.string(),
-      image: yup.string(),
+      text: yup.string(),
+      status: yup.string().oneOf(["pending", "done"]),
+      isCompleted: yup.boolean(),
     });
 
     await schema.validate(postData);
